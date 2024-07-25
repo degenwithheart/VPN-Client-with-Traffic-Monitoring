@@ -1,4 +1,5 @@
 import socket
+import socks  # This requires the PySocks package
 import threading
 import logging
 import os
@@ -6,6 +7,7 @@ from cryptography.fernet import Fernet
 from dotenv import load_dotenv
 from config import SERVER_IP, SERVER_PORT, LOCAL_PORT, MONITOR_INTERVAL
 from traffic_monitor import start_traffic_monitor
+from setup_tor import setup_tor
 
 load_dotenv()
 
@@ -51,18 +53,25 @@ def start_client(local_port, server_ip, server_port):
     local_socket.listen(5)
     logging.info(f"VPN Client listening on port {local_port}")
 
+    # Setup and start Tor
+    tor_process = setup_tor()
+
     while True:
         client_socket, addr = local_socket.accept()
         logging.info(f"Connection established with local client {addr}")
 
-        server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        server_socket.connect((server_ip, server_port))
+        # Create a socket connection through Tor
+        tor_socket = socks.socksocket()
+        tor_socket.set_proxy(socks.SOCKS5, '127.0.0.1', 9050)
+        tor_socket.connect((server_ip, server_port))
 
-        local_handler = threading.Thread(target=handle_local_connection, args=(client_socket, server_socket))
-        server_handler = threading.Thread(target=handle_server_connection, args=(server_socket, client_socket))
+        local_handler = threading.Thread(target=handle_local_connection, args=(client_socket, tor_socket))
+        server_handler = threading.Thread(target=handle_server_connection, args=(tor_socket, client_socket))
 
         local_handler.start()
         server_handler.start()
+
+    tor_process.terminate()  # Terminate Tor process when done
 
 if __name__ == "__main__":
     start_traffic_monitor(MONITOR_INTERVAL)
