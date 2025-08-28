@@ -90,10 +90,5 @@ The traffic monitor captures network statistics and logs them. It runs concurren
 - **Dependency Errors**: Ensure all required Python packages are installed. Use `pip` to install any missing dependencies.
 - **Logging Errors**: Check `client/traffic_log.txt` for detailed traffic logs and error messages.
 
-## Contributing
-
-Feel free to submit issues or pull requests. Contributions are welcome to improve the VPN system or add new features.
-
-## License
-
-This project is licensed under the MIT License. See the [LICENSE](../LICENSE) file for details.
+If this project helps you stay private and secure, please consider supporting ongoing privacy tools:
+SOL: 4U3kLekCh53rXxxQE3hSbqoKKLzZpLYYZRTc26R8mnGe
